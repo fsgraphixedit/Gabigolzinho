@@ -1,0 +1,624 @@
+<title>Gabigolzinho 2D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Gabigolzinho: série animada 2D, projeto piloto 4Content × Gabigol. Futebol, trap e música num universo noturno.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,700;1,9..40,800&display=swap">
+<style>
+/* Layout: portal de desenho dos anos 2000 (moldura cromada, abas, janelas com barra de título), na paleta noturna da série. Blocos próximos, moodboards de imagem, logos como etiquetas que saem da moldura. */
+:root{
+  --jet:#0A0A10;
+  --navy:#1B2447;
+  --steel:#4F7FB8;
+  --char:#2B2630;
+  --cold:#E8E6F2;
+  --blue:#2F6FE4;
+  --mute:#A9ADC8;
+  --chrome-hi:#E8E6F2;
+  --chrome-lo:#7C86A4;
+  --toon:"Luckiest Guy","Arial Black",Impact,system-ui,sans-serif;
+  --text:"DM Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bounce:cubic-bezier(.3,1.6,.5,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+html{scroll-behavior:smooth}
+[hidden]{display:none!important}
+body{margin:0;background:var(--jet);color:var(--cold);font-family:var(--text);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+img,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--steel);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--jet);z-index:90}
+
+/* cenários da série no fundo */
+.stagebg{position:fixed;inset:0;z-index:-1;background:var(--jet)}
+.stagebg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease}
+.stagebg img.on{opacity:.5}
+.stagebg::after{content:"";position:absolute;inset:0;background:radial-gradient(90% 70% at 50% 40%,rgba(10,10,16,.25),rgba(10,10,16,.88) 80%)}
+
+.page{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 70px}
+.shell{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+
+/* ---------- peças 2000s ---------- */
+.chrome{background:linear-gradient(180deg,var(--chrome-hi),#B9BFD3 45%,var(--chrome-lo));border:2px solid var(--jet);border-radius:14px;padding:10px;box-shadow:inset 0 2px 0 #fff,inset 0 -3px 0 rgba(0,0,0,.25),0 18px 50px rgba(0,0,0,.55)}
+.win{background:var(--navy);border:2px solid var(--jet);border-radius:10px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(232,230,242,.12)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;background:linear-gradient(180deg,#2F3550,#0E1120 55%,var(--jet));border-bottom:2px solid var(--jet)}
+.bar h2,.bar .h{margin:0;font-family:var(--toon);font-weight:400;font-size:clamp(1.15rem,2.2vw,1.6rem);line-height:1.1;color:var(--cold);letter-spacing:.01em}
+.bar .dots{display:flex;gap:5px;flex:none}
+.bar .dots i{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--jet);background:linear-gradient(180deg,#9aa3bf,#5d6787)}
+.bar .dots i:last-child{background:linear-gradient(180deg,#8fb3e0,var(--steel))}
+.bar .sm{font-weight:700;font-style:italic;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.body{padding:16px}
+.gloss{position:relative;overflow:hidden}
+.gloss::after{content:"";position:absolute;left:-60%;top:0;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);transition:left .6s ease;pointer-events:none}
+.gloss:hover::after{left:130%}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--toon);font-size:1rem;background:linear-gradient(180deg,#fff,var(--cold) 50%,#C7CCE0);color:var(--jet);border:2px solid var(--jet);border-radius:999px;padding:.4em 1.1em .28em;box-shadow:0 3px 0 var(--jet);transition:transform .2s var(--bounce)}
+.btn:hover{transform:translateY(-2px) scale(1.04)}
+.lead{margin:0;font-size:1rem;color:var(--cold)}
+.lead b{font-weight:700}
+.muted{color:var(--mute)}
+
+/* logos como etiqueta: png solto, saindo da moldura */
+.tagged{position:relative}
+.ltag{position:absolute;z-index:5;pointer-events:none;width:auto;transform:rotate(-5deg);
+  filter:drop-shadow(2px 0 0 var(--cold)) drop-shadow(-2px 0 0 var(--cold)) drop-shadow(0 2px 0 var(--cold)) drop-shadow(0 -2px 0 var(--cold)) drop-shadow(5px 6px 0 rgba(10,10,16,.75))}
+
+/* lettering */
+.lt{font-family:var(--toon);font-weight:400;line-height:.9;color:var(--cold);-webkit-text-stroke:.085em var(--jet);paint-order:stroke fill;
+  text-shadow:.035em .035em 0 var(--steel),.07em .07em 0 var(--steel),.1em .1em 0 var(--jet),.12em .12em 0 var(--jet)}
+.lt .l{display:inline-block;transform-origin:50% 85%;transition:transform .3s var(--bounce)}
+.lt .l:hover{transform:translateY(-.14em) rotate(var(--hr,-8deg)) scale(1.1)!important}
+
+/* ---------- topo do portal ---------- */
+.portal{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:end;padding:2px 6px 0}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .gl{height:58px;width:auto;filter:brightness(0) drop-shadow(3px 3px 0 var(--steel));transform:rotate(-4deg)}
+.brand .wd{display:grid;line-height:1}
+.brand .wd b{font-family:var(--toon);font-weight:400;font-size:1.45rem;color:var(--jet)}
+.brand .wd span{font-weight:800;font-size:.68rem;letter-spacing:.18em;color:#2E3550;margin-top:4px}
+.tabs{display:flex;gap:6px;justify-content:center;align-items:flex-end;min-width:0}
+.tab{font-family:var(--toon);font-size:clamp(.95rem,1.5vw,1.25rem);color:var(--cold);padding:.55em 1.05em .38em;border:2px solid var(--jet);border-bottom:0;border-radius:10px 10px 0 0;transform:skewX(-8deg);text-shadow:0 2px 0 rgba(0,0,0,.4);box-shadow:inset 0 2px 0 rgba(255,255,255,.35);background:linear-gradient(180deg,var(--c1),var(--c2));transition:transform .25s var(--bounce);white-space:nowrap}
+.tab span{display:inline-block;transform:skewX(8deg)}
+.tab:hover{transform:skewX(-8deg) translateY(-5px)}
+.t1{--c1:#6E9BD2;--c2:#3B649A}.t2{--c1:#2E3B6E;--c2:var(--navy)}.t3{--c1:#4A4252;--c2:var(--char)}.t4{--c1:#23233A;--c2:var(--jet)}
+.head .by{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.7rem;letter-spacing:.12em;color:#2E3550;white-space:nowrap}
+.head .by img{height:16px;width:auto;filter:brightness(0) saturate(100%) invert(16%) sepia(18%) saturate(1500%) hue-rotate(195deg)}
+
+/* ---------- capa ---------- */
+.hero{position:relative;border:2px solid var(--jet);border-radius:10px;overflow:hidden;aspect-ratio:16/8.4;background:var(--jet);container-type:inline-size}
+.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 38%}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,16,.15),transparent 30%,transparent 52%,rgba(10,10,16,.9) 92%)}
+.hero .copy{position:absolute;inset:auto 0 0;z-index:2;display:grid;justify-items:center;text-align:center;gap:10px;padding:0 14px 26px}
+.hero .sub{font-weight:600;font-size:clamp(.72rem,1.2vw,.95rem);letter-spacing:.45em;text-transform:uppercase;padding-left:.45em;color:var(--cold)}
+.logo{margin:0;white-space:nowrap;font-size:9.4cqi;text-shadow:.03em .03em 0 var(--steel),.06em .06em 0 var(--steel),.09em .09em 0 var(--steel),.12em .12em 0 var(--jet),.14em .14em 0 var(--jet)}
+.burst{position:absolute;top:16px;right:16px;z-index:3;width:clamp(78px,10cqi,124px);aspect-ratio:1;display:grid;place-items:center;text-align:center;background:var(--steel);color:var(--cold);font-family:var(--toon);font-size:clamp(.72rem,1.4cqi,1.05rem);line-height:1.05;text-shadow:2px 2px 0 var(--jet);clip-path:polygon(50% 0,61% 13%,77% 6%,79% 22%,95% 24%,88% 39%,100% 50%,88% 61%,95% 76%,79% 78%,77% 94%,61% 87%,50% 100%,39% 87%,23% 94%,21% 78%,5% 76%,12% 61%,0 50%,12% 39%,5% 24%,21% 22%,23% 6%,39% 13%);animation:wob 6s ease-in-out infinite}
+.burst span{transform:rotate(-10deg)}
+@keyframes wob{0%,100%{transform:rotate(10deg)}50%{transform:rotate(18deg) scale(1.05)}}
+
+/* manifesto */
+.mani{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:center}
+.mani blockquote{margin:0;font-weight:800;font-size:clamp(1.5rem,3.2vw,2.4rem);line-height:1.12;letter-spacing:-.015em}
+.mani blockquote span{color:var(--steel)}
+
+/* personagens */
+.duo2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.char .st{position:relative;height:clamp(340px,34vw,430px);display:grid;place-items:end center;overflow:hidden;border-bottom:2px solid var(--jet);background:radial-gradient(60% 55% at 50% 72%,rgba(79,127,184,.5),transparent 70%),linear-gradient(180deg,#141B36,var(--navy))}
+.char.c .st{background:radial-gradient(60% 55% at 50% 72%,rgba(232,230,242,.22),transparent 70%),linear-gradient(180deg,#221E28,var(--char))}
+.char .st .fig{position:absolute;bottom:0;left:50%;translate:-50% 0;height:92%;width:auto;max-width:none;filter:drop-shadow(6px 6px 0 rgba(10,10,16,.5));transform-origin:50% 100%;animation:idle 3.6s ease-in-out infinite}
+@keyframes idle{0%,100%{transform:rotate(-.8deg)}50%{transform:rotate(.8deg) scaleY(1.01)}}
+.char .nm{position:absolute;left:14px;top:12px;font-size:clamp(1.9rem,3.4vw,2.8rem);z-index:2}
+.char .body{display:grid;gap:12px}
+.fi{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid rgba(232,230,242,.15)}
+.fi div{padding:8px 0;border-bottom:1px solid rgba(232,230,242,.15);min-width:0}
+.fi div:nth-child(odd):not(.wd){padding-right:10px}
+.fi .wd{grid-column:1/-1}
+.fi dt{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);font-weight:800}
+.fi dd{margin:1px 0 0;font-size:.92rem;line-height:1.35}
+
+/* episódios: galeria que abre popup */
+.eps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ep{padding:0;border:2px solid var(--jet);border-radius:10px;overflow:hidden;background:var(--char);text-align:left;transition:transform .25s var(--bounce)}
+.ep:hover{transform:translateY(-4px)}
+.ep .th{position:relative;aspect-ratio:16/9;overflow:hidden}
+.ep .th img{width:100%;height:100%;object-fit:cover;transition:transform .7s}
+.ep:hover .th img{transform:scale(1.05)}
+.ep .th::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,16,.55),transparent 55%)}
+.ep .pl{position:absolute;z-index:2;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:var(--cold);border:2px solid var(--jet);display:grid;place-items:center;box-shadow:0 4px 0 var(--jet);transition:transform .25s var(--bounce)}
+.ep .pl::before{content:"";border-block:10px solid transparent;border-left:16px solid var(--jet);margin-left:5px}
+.ep:hover .pl{transform:scale(1.12)}
+.ep .du{position:absolute;z-index:2;right:8px;bottom:8px;background:rgba(10,10,16,.85);font-weight:700;font-size:.75rem;padding:2px 7px;border-radius:4px}
+.ep .tx{padding:10px 12px 12px}
+.ep b{display:block;font-weight:800;font-size:1rem}
+.ep small{display:block;color:var(--mute);font-size:.84rem;line-height:1.35;margin-top:2px}
+
+/* moodboards */
+.mood{display:grid;grid-auto-flow:dense;gap:6px;padding:6px}
+.mood button{position:relative;padding:0;border:0;border-radius:6px;overflow:hidden;background:var(--jet);cursor:zoom-in;min-height:0}
+.mood img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.2,.8,.2,1),filter .3s}
+.mood button:hover img{transform:scale(1.06);filter:brightness(1.12)}
+.mood.duo{grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:clamp(58px,6.6vw,84px)}
+.mood.duo button{grid-column:span 2;grid-row:span 2}
+.mood.duo button:nth-child(-n+2){grid-column:span 3;grid-row:span 3}
+.mood.night{grid-template-columns:repeat(8,minmax(0,1fr));grid-auto-rows:clamp(44px,4.9vw,64px)}
+.mood.night button{grid-column:span 2;grid-row:span 2}
+.mood.night button.w{grid-column:span 4;grid-row:span 4}
+.mood.night button.w.r{grid-column:5 / span 4}
+.mood.alt3{grid-template-columns:repeat(4,minmax(0,1fr))}
+.mood.alt3 button{aspect-ratio:16/9}
+.d3sheet{padding:0 6px 6px;display:grid;justify-items:center}
+.d3sheet button{width:min(560px,100%);padding:0;border:2px solid var(--jet);border-radius:8px;overflow:hidden;background:#fff;cursor:zoom-in}
+.d3sheet img{width:100%;aspect-ratio:3168/1344;object-fit:contain}
+
+/* arte */
+.art{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+.art .shot{border:2px solid var(--jet);border-radius:8px;overflow:hidden;cursor:zoom-in;padding:0;background:none}
+.art .shot img{width:100%;aspect-ratio:2.357;object-fit:cover}
+.rule{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;padding:8px 0;border-bottom:1px solid rgba(232,230,242,.15)}
+.rule b{font-family:var(--toon);font-weight:400;font-size:1.1rem}
+.rule p{margin:0;font-size:.9rem;color:var(--mute)}
+.pal{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:14px}
+.sw{border:2px solid var(--jet);border-radius:8px;height:76px;padding:8px;display:flex;flex-direction:column;justify-content:flex-end;font-size:.78rem;line-height:1.2}
+.sw b{font-weight:800}
+.sw.l{color:var(--jet)}
+
+/* referências */
+.refrows{display:grid;gap:34px;padding:34px 16px 18px}
+.rrow{position:relative}
+.rrow .ltag{top:-30px;left:-10px;height:62px}
+.rrow .strip{display:flex;gap:6px;height:clamp(150px,17vw,220px)}
+.rrow .strip button{flex:1 1 0;min-width:0;padding:0;border:2px solid var(--jet);border-radius:8px;overflow:hidden;background:var(--jet);cursor:zoom-in;transition:flex .5s cubic-bezier(.2,.8,.2,1)}
+.rrow .strip button:hover{flex-grow:1.8}
+.rrow .strip img{width:100%;height:100%;object-fit:cover}
+.rrow.others .strip{height:clamp(120px,13vw,170px)}
+.rrow .note{display:block;margin:8px 2px 0;font-size:.85rem;color:var(--mute)}
+.rrow .note b{color:var(--cold)}
+.tagtxt{position:absolute;z-index:5;top:-18px;left:-8px;transform:rotate(-4deg);font-family:var(--toon);font-size:1.05rem;color:var(--jet);background:var(--cold);padding:.35em .7em .2em;border-radius:6px;border:2px solid var(--jet);box-shadow:4px 4px 0 var(--steel)}
+
+/* cn */
+.cnw{margin-top:26px}
+.cnw > .ltag{top:-40px;right:18px;height:96px;transform:rotate(6deg)}
+.cn{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:center}
+.cn h3{margin:0 0 10px;font-family:var(--toon);font-weight:400;font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.05}
+.q{margin:0;padding:18px 20px;background:var(--char);border:2px solid var(--jet);border-left:6px solid var(--steel);border-radius:8px}
+.q p{margin:0;font-weight:800;font-size:clamp(1.2rem,2.2vw,1.6rem);line-height:1.25}
+.q cite{display:block;margin-top:10px;font-style:normal;font-size:.8rem;color:var(--mute)}
+.q cite b{color:var(--cold)}
+.src{font-size:.72rem;color:var(--mute);margin:10px 0 0}
+.src a{color:#8fb3e0;text-decoration:underline}
+
+/* por que */
+.why{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.wc{border:2px solid var(--jet);border-radius:10px;background:var(--char);overflow:hidden}
+.wc img{width:100%;aspect-ratio:2.357;object-fit:cover}
+.wc .tx{padding:12px 14px 14px;display:grid;gap:4px}
+.wc h3{margin:0;font-family:var(--toon);font-weight:400;font-size:1.3rem;line-height:1}
+.wc p{margin:0;font-size:.9rem}
+.wc .k{font-style:italic;font-weight:700;font-size:.8rem;color:var(--steel)}
+
+/* aplicações */
+.apps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ap{border:2px solid var(--jet);border-radius:10px;overflow:hidden;background:var(--char)}
+.ap img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.ap .tx{padding:10px 12px 12px;display:grid;gap:4px}
+.ap h3{margin:0;font-family:var(--toon);font-weight:400;font-size:1.3rem;line-height:1}
+.ap p{margin:0;font-size:.86rem;color:var(--mute)}
+.ap .tg{justify-self:start;font-weight:800;font-size:.66rem;letter-spacing:.14em;background:var(--steel);color:var(--jet);padding:2px 7px;border-radius:4px}
+
+/* merch */
+.merch{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:22px;align-items:center}
+.merch .lead{font-size:1.02rem}
+.racks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.shirt{display:grid;gap:10px;padding:0;border:0;background:none;text-align:left;cursor:zoom-in}
+.shirt .box{position:relative;aspect-ratio:4/5;border:2px solid var(--jet);border-radius:10px;overflow:hidden;display:grid;place-items:center;
+  background:radial-gradient(65% 55% at 50% 45%,rgba(79,127,184,.45),transparent 70%),linear-gradient(180deg,#232C58,var(--navy) 60%,#121833)}
+.shirt.w .box{background:radial-gradient(65% 55% at 50% 45%,rgba(232,230,242,.22),transparent 70%),linear-gradient(180deg,#2E2934,var(--char) 60%,#17141B)}
+.shirt .box{animation:float 5.5s ease-in-out infinite;transition:transform .5s var(--bounce),box-shadow .4s}
+.shirt.w .box{animation-delay:-2.7s}
+.shirt .box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--bounce)}
+@keyframes float{0%,100%{translate:0 0;rotate:-1.2deg}50%{translate:0 -8px;rotate:1.2deg}}
+.shirt:hover .box{transform:scale(1.03);box-shadow:0 0 0 2px var(--steel),0 18px 40px rgba(79,127,184,.35)}
+.shirt:hover .box img{transform:scale(1.07) rotate(-2deg)}
+.shirt .lab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:0 2px}
+.shirt .lab b{font-weight:800;font-size:.95rem;line-height:1.25}
+.shirt .lab small{display:block;color:var(--mute);font-size:.8rem}
+.shirt .lab i{font-style:normal;font-weight:800;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;background:var(--cold);color:var(--jet);padding:3px 8px;border-radius:4px;white-space:nowrap}
+
+/* outra possibilidade (3d) */
+.tref{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;align-items:center;padding:14px 16px 18px;border-top:2px solid var(--jet)}
+.tref .tv{display:grid;gap:8px}
+.tref .tvh{font-family:var(--toon);font-size:clamp(1.3rem,2.4vw,1.9rem);line-height:1}
+.tref .scr{position:relative;display:block;aspect-ratio:16/9;border:2px solid var(--jet);border-radius:10px;overflow:hidden;background:#000;box-shadow:0 0 0 4px #2F3550,0 0 0 6px var(--jet)}
+.tref .scr img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.tref .scr:hover img{transform:scale(1.04)}
+.tref .scr::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,16,.5),transparent 60%)}
+.tref .pl{position:absolute;z-index:2;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:var(--cold);border:2px solid var(--jet);display:grid;place-items:center;box-shadow:0 4px 0 var(--jet);transition:transform .25s var(--bounce)}
+.tref .pl::before{content:"";border-block:11px solid transparent;border-left:18px solid var(--jet);margin-left:5px}
+.tref .scr:hover .pl{transform:scale(1.12)}
+.ttx{display:grid;gap:10px;justify-items:start}
+.ttx .k{font-style:italic;font-weight:700;font-size:.8rem;color:var(--steel)}
+.ttx h3{margin:0;font-family:var(--toon);font-weight:400;font-size:clamp(1.4rem,2.4vw,1.9rem);line-height:1.05}
+.ttx p{margin:0;font-size:.95rem;color:var(--cold)}
+.ttx p + p{color:var(--mute)}
+
+/* merch: título em lettering */
+.mtext{display:grid;gap:12px;justify-items:start}
+.bar .mlogo{margin:-26px 0 -14px -22px;font-family:var(--toon);font-size:clamp(2.6rem,4.6vw,3.6rem);line-height:.9;white-space:nowrap;transform:rotate(-4deg);position:relative;z-index:3;color:var(--cold)}
+.mtext h3{margin:0;font-weight:800;font-size:clamp(1.4rem,2.6vw,2rem);line-height:1.1;letter-spacing:-.01em;color:var(--cold)}
+
+/* assinatura final, solta no fundo */
+.sign{text-align:center;padding:56px 8px 8px;display:grid;justify-items:center;gap:14px}
+.sign .logo2{font-size:min(8.6vw,6.2rem);white-space:nowrap}
+.part{display:flex;align-items:center;gap:12px}
+.part img{height:20px;width:auto}
+.part .gl{height:28px}
+.part i{font-style:normal;color:var(--steel);font-weight:800}
+.part span{font-weight:800;letter-spacing:.14em;font-size:.8rem}
+.sign .disc{max-width:640px;margin:6px 0 0;font-size:.85rem;color:var(--mute);line-height:1.6}
+.sign .disc b{color:var(--cold);font-weight:700}
+.fnav{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 18px;padding:8px 12px;border-radius:8px;margin-top:18px}
+.fnav a{font-weight:800;font-style:italic;text-transform:uppercase;font-size:.85rem}
+.fnav a::before{content:"▸ ";color:var(--steel)}
+
+/* termômetro */
+.thermo{position:fixed;z-index:60;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));height:28px;pointer-events:none;transition:opacity .5s,transform .5s}
+.thermo.gone{opacity:0;transform:translateY(16px)}
+.thermo .tr{position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:rgba(232,230,242,.16);border-radius:2px}
+.thermo .fl{position:absolute;left:0;top:50%;height:4px;margin-top:-2px;width:0;border-radius:2px}
+.thermo .mk{position:absolute;top:0;left:0;width:16px;height:28px;margin-left:-8px;filter:drop-shadow(1px 1px 0 var(--navy)) drop-shadow(1px 1px 0 var(--navy)) drop-shadow(1px 1px 0 var(--jet)) drop-shadow(0 0 6px rgba(47,111,228,.5))}
+.thermo .mk i{display:block;width:100%;height:100%;background:var(--cold);-webkit-mask:url("data:image/png;base64,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") center/contain no-repeat;mask:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAABgCAYAAAC9pTo0AAAIqUlEQVR4Xt2caawmRRWG30KQRVFccUFRVMQNElQMCKKCEnDjh39EJRrjlvlhYohGjJIYo0YymLgkhOhowKCMic6AIgaQmRBQgqCIyCAIiIKIrLLI/pj3m7p3+vbt6q7+qpo7+CTzA2531Tldyzl16pxPmghgO+Ag4FTgBuBe4GfA6yfqclqAJwDfBx5iOXcBnwGeMa0UlQEO71CmzVpgm8pdz5ikUUmHZQj7sCQynhvNVErtniHJpSGEQaWAnTLaWkKWUsDuwFuA7TM7eGLGczv2PQO8ADhZ0uXAKcDzMtrMA3g78I+4IH4DvGnoTeCMjDV1XKod4Ii4Yza5DHjZUN+DAIcA97QEvN+d9gi0A3BWhlLf9rbfbgfYEfhr4v3rgbcNCt4j3E6Ah76LL/S8txp4IEMpf5wPdCg1tHPe59nTp1jfmlol6dWJl98HpNZNkLLWlNfnspGSdJWkMyTdmujba/FEr7lRIwY8B7il42s/ClwAHAlY+GUAewM3DoyU27nS/fSM+K7AfsBhwHuB42E2ugt4fT8tWzHg2JZQvwKOAQ6wtzDUEPBy4LYexU6bx6MAVrXa/CXwlCF5Frbv5ihdATx18MUGwLZxJFJ8dkx7C3h2AL9oNXp2W76uNfUVSc9qdLo6hHDXGCFCCPYW+t5ZXI/AzsAuXqOeTsAOqb6isT6x9fdD4xpbnEFL1gXwTknrG+7T7d4sQgj/TKwfL/ajpNlz20r6o6TXStpN0jGSdk0IeLekP8R+vOAt0G3xY94j6d/x76dL2hBCeKAxWs+WtElSez19OoTwjSX9eQiBTa2h3ZhQxh7GUcDpreftgdfGRvfLwMejo+wTwPqOTu4EXtJW6lMdD36v8YW8Tuwq/Ri4o7bkI7gIZjtfF2ss72z6RZtzsaS9WyPzVUk/lWRj9x5J+41ZWyvA/ZIOXVDqDZIu7DiKeK14y/R6ebywcUHYtybOVk9/vGjS4OBt4unT2+L/Cxtsp/aVdOBWqJFt3amSzo0mY4j7pJkJ+JCn36PRTmxN/EXSqhDCOXEj8wHxFZJ8nrLt82nYSt8h6V/x33UhhKtnSkTXw9Gd9rmpC59zvg68H1iTiBaVYlvX3oVHsehRAK+SdLik10TL7lH0FnmnpOslXSTp/BDCfxq2y8eTb1YO4JwXQvDGtTLEOIIPbTX5Uak2WYGXHuyHJR3QObFtLKJUKduxzsNiAV78RZQq1RvmmhPvZkWUKlV76pkbijSqsGuVfpQ2j8SdtohSoWy4a+Kp97fSBkuVurdUgBaXhxBsF4soVWrREFfivBrtlCq1GDuoxLU12ilV6kk1hGiwc432SpXKubIZw+i7qC5Klaq9+1WhVKlbpJltqYXjgcWUKuVD2XXFUmzh7zXaKlIqhOAj9CU1BJH03xqG1xQpFbmpklKOvRcfO2op9dxKStnjX/ndL95V7VVJKduo1IXCKEqn3/MlLQ3Kz49lqdJWqVJOAqniBUSqxOpLlcpNFsnFd7zF4YG5lYrr6YO50mayS05qzyQ4/g6cUDMuFvFds28iH3uAPYFHJlDK/KRUo3mn34umSmuTtA/w5FLFRhFv0S+eaJQW+OgooUoB9gUenlipa8bmbjSZZ/odPPLq58qYazQmnmEj/MnSAcgiJvymbsZTvNuNJ9IE+vBO6HyMaYl5DE6WyuVm4JlRqaNzX2rwnUk1ivlGTnAaw/ELQjkxCrh6zMsxl33PsYqNWVN2X5KpbB34bPSthf8fL+tWjxTQR5HaXssWYJZ/15fu1saJW0tw5jLw+5GjZfMx5uPnE5MTc7fym/wRulqP63KMN+KcIx9xshnzBdzwYAJj5GshhNQ901mSzsyWUHKu4R4jnh+tVA4bnH+XejB64V+KKQO5jIoEjxkp3+8O4WTeT4QQHux7MITg5K53SbpmqMHIZEoNVdG4xMGJhM5WHiSE4Gl4pKSbBx/WuMPomJEayixeG0I4JUPARUIIV0R3aCjKO5z822CMUn3HAaeIJsscBqbiOkkn9D4kvXDg7/MBnN9jX747X6ubifbrdz3tX1jdVvnQ1pNAb9tVHAUCDuwpp3AfB5V8uGUAH4OkI3tOra84EPdYW02p6Iimyhz8Bd9cq7OYcf2nxDS8e1k287wA+/cEWX4wb7spXJ8VvfMubLTLGDhuOD/QAZjqwKy2qguX1s7OZ3MDfKRnRzq5RjS1C8ClTCk+V6KQjwkuB+rCXvYb5258gLgTprjW9SF9TfQZX28AqWsaX2O6VmMqXPfxUKLxF0t63bxKvaPnxU0hhNopPE2c82cvJcX+PX/rHam+5Nwsp7UAK+XKnBT7jFYq1jD11dXaEZ2MWFq0OR27G1e1JmsSU2vqpVJSKR8xLptMoy10ljlFfAxKumYppbxJpLIuvUn8+TFQ6rSeClLzypQMKaX65uz6EEKVzJQ+QghOOz2255lxxxHg1wkjcXs1/yuDeLl3bkKW/HuseFXTLuNb4PMZslQlVtd1hdQusRuX1VkMWt7a8XVsyUeVxtYgjtbGDnksY2cwqGtNOYG+KyawZmxpbA1CCE6/O6mjLW9knRkyKaXaNe1OrPJutFI4+NnOgfLU66q971TKPlc7uvPbxdqkFSCEYA/j562unRXdWULRNVKOwzlNrYkryFYa73bNn0/xh3dh2DK6lGpnnNgHqxcfmB/Xb93YeN0hu+w15dScZsKvMy+dVrrSOF28eengVLrdgL3av0DSNVI+/DWVWhdCGIqgTk6Mzzfji94kXFxtM7NkGi5RCnDZ3BdbEm5NGc3tiwf7qI4ML7liWlQq/ljF0a0QrzeMsycfhnzaJ3HLbz/Vp4rlAB/uCIX5Fq9WOmkxwLqEH3gV4ALRzVho4CTgwcQLBxRLUwngh7EMtyvtwQPggdnOPy9ygSQL7rXTXGP+b2epHBJCuLSSXEXEWeNsUG/lPij6F07s//mf44E2P8f9D+QZKy1RASxXAAAAAElFTkSuQmCC") center/contain no-repeat}
+
+/* popup: fundo escuro com desfoque, janela no centro */
+.modal{position:fixed;inset:0;z-index:200;background:rgba(4,5,10,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));animation:fade .25s ease}
+@keyframes fade{from{opacity:0}}
+.mwin{width:min(1100px,100%);max-height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:var(--navy);border:2px solid var(--jet);border-radius:12px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.8);animation:pop .35s var(--bounce)}
+@keyframes pop{from{transform:scale(.88);opacity:0}}
+.mwin .bar .x{width:30px;height:28px;border-radius:6px;border:1.5px solid var(--jet);background:linear-gradient(180deg,#fff,#C7CCE0);color:var(--jet);font-weight:800;padding:0;line-height:1}
+.mwin .stage{background:#000;display:grid;place-items:center;min-height:0}
+.mwin video{width:100%;max-height:72vh;aspect-ratio:16/9;background:#000}
+.mwin .stage img{max-width:100%;max-height:74vh;object-fit:contain}
+.mwin .ft{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;flex-wrap:wrap}
+.mwin .ft b{font-weight:800}
+.mwin .ft small{display:block;color:var(--mute);font-size:.85rem}
+.mwin .nav{display:flex;gap:6px}
+.mwin .nav button{width:38px;height:32px;border-radius:6px;border:1.5px solid var(--jet);background:linear-gradient(180deg,#fff,#C7CCE0);color:var(--jet);font-weight:800;padding:0}
+
+/* responsivo */
+@media (max-width:960px){
+  .head{grid-template-columns:auto minmax(0,1fr)}
+  .head .by{display:none}
+  .mani,.art,.cn,.merch{grid-template-columns:minmax(0,1fr)}
+  .why{grid-template-columns:minmax(0,1fr)}
+  .apps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cnw > .ltag{height:72px;top:-30px}
+}
+@media (max-width:680px){
+  .head{grid-template-columns:minmax(0,1fr)}
+  .tabs{justify-content:flex-start;overflow-x:auto;scrollbar-width:none;padding-top:6px}
+  .hero{aspect-ratio:4/4.6}
+  .hero>img{object-position:55% 40%}
+  .logo{font-size:10.4cqi}
+  .duo2{grid-template-columns:minmax(0,1fr)}
+  .eps{grid-template-columns:minmax(0,1fr)}
+  .apps{grid-template-columns:minmax(0,1fr)}
+  .pal{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fi{grid-template-columns:minmax(0,1fr)}
+  .mood.duo{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:auto}
+  .mood.duo button,.mood.duo button:nth-child(-n+2){grid-column:span 1;grid-row:auto;aspect-ratio:16/10}
+  .mood.duo button:nth-child(1){grid-column:span 2}
+  .mood.night{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:auto}
+  .mood.night button,.mood.night button.w,.mood.night button.w.r{grid-column:span 1;grid-row:auto;aspect-ratio:2.357}
+  .mood.night button.w{grid-column:span 2}
+  .rrow .strip{overflow-x:auto;height:130px}
+  .rrow .strip button{flex:0 0 58%}
+  .rrow .strip button:hover{flex-grow:0}
+  .rrow .ltag{height:46px;top:-24px}
+  .tref{grid-template-columns:minmax(0,1fr)}
+  .mood.alt3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .racks{gap:10px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="stagebg" id="stagebg" aria-hidden="true">
+  <img src="https://res.cloudinary.com/pjqox6al/image/upload/bg1.webp" alt="" data-bg="1" class="on"><img src="https://res.cloudinary.com/pjqox6al/image/upload/bg2.webp" alt="" data-bg="2" loading="lazy"><img src="https://res.cloudinary.com/pjqox6al/image/upload/bg3.webp" alt="" data-bg="3" loading="lazy"><img src="https://res.cloudinary.com/pjqox6al/image/upload/bg4.webp" alt="" data-bg="4" loading="lazy">
+  <img src="https://res.cloudinary.com/pjqox6al/image/upload/bg5.webp" alt="" data-bg="5" loading="lazy"><img src="https://res.cloudinary.com/pjqox6al/image/upload/bg6.webp" alt="" data-bg="6" loading="lazy"><img src="https://res.cloudinary.com/pjqox6al/image/upload/bg7.webp" alt="" data-bg="7" loading="lazy"><img src="https://res.cloudinary.com/pjqox6al/image/upload/bg8.webp" alt="" data-bg="8" loading="lazy">
+</div>
+
+<div class="page"><div class="shell">
+
+<div class="chrome portal" id="home" data-bg="1">
+  <header class="head">
+    <a class="brand" href="#home" aria-label="Gabigolzinho, início">
+      <img class="gl" src="https://res.cloudinary.com/pjqox6al/image/upload/logo-gabigol.webp" alt="">
+      <span class="wd"><b>GABIGOLZINHO</b><span>SÉRIE ANIMADA 2D</span></span>
+    </a>
+    <nav class="tabs" aria-label="Seções">
+      <a class="tab t1 gloss" href="#personagens"><span>Personagens</span></a>
+      <a class="tab t2 gloss" href="#episodios"><span>Episódios</span></a>
+      <a class="tab t3 gloss" href="#referencias"><span>Referências</span></a>
+      <a class="tab t4 gloss" href="#merch"><span>Merch</span></a>
+    </nav>
+    <span class="by"><img src="https://res.cloudinary.com/pjqox6al/image/upload/logo-4content.webp" alt="4Content">× GABIGOL</span>
+  </header>
+
+  <section class="hero" aria-label="Capa">
+    <img src="https://res.cloudinary.com/pjqox6al/image/upload/s22.webp" alt="Gabigolzinho e Cebola disputando no fliperama, luz neon azul e rosa" fetchpriority="high">
+    <div class="burst"><span>PILOTO<br>2026</span></div>
+    <div class="copy">
+      <span class="sub">Apresentando</span>
+      <h1 class="lt logo" data-split data-tilt aria-label="Gabigolzinho">GABIGOLZINHO</h1>
+    </div>
+  </section>
+</div>
+
+<section class="win" data-bg="1" aria-labelledby="h-mani">
+  <div class="bar"><h2 id="h-mani">Manifesto</h2><span class="dots"><i></i><i></i><i></i></span></div>
+  <div class="body mani">
+    <blockquote>Todo craque tem uma vida que a <span>câmera não mostra.</span></blockquote>
+    <p class="lead">O que acontece depois do apito final, quando o refletor do estádio apaga e outro acende no estúdio? <b>Gabigolzinho nasce desse intervalo.</b> Num mundo noturno, de luz fria e ruas molhadas, a mesma pessoa vive duas versões de si: camisa 9 de dia, Lil Gabi de madrugada.</p>
+  </div>
+</section>
+
+<section class="win" id="personagens" data-bg="3" aria-labelledby="h-pers">
+  <div class="bar"><h2 id="h-pers">Personagens</h2><span class="sm">Conheça a dupla</span></div>
+  <div class="body duo2">
+    <article class="win char g">
+      <div class="st">
+        <span class="lt nm" data-split aria-hidden="true">Gabigolzinho</span>
+        <img class="fig" src="https://res.cloudinary.com/pjqox6al/image/upload/gabi.webp" alt="Gabigolzinho de corpo inteiro, camisa preta de manga longa, short preto, meião e tênis brancos" loading="lazy">
+      </div>
+      <div class="body">
+        <p class="lead">Centroavante, camisa 9. <b>Marra dentro de campo, flow no microfone</b> e um cara tranquilo por trás de tudo isso.</p>
+        <dl class="fi">
+          <div><dt>Alter ego</dt><dd>Lil Gabi</dd></div>
+          <div><dt>Horário nobre</dt><dd>Depois da meia-noite</dd></div>
+          <div class="wd"><dt>Uniforme</dt><dd>Long Sleeve Soccer Jersey Black · Gabigol logo</dd></div>
+          <div class="wd"><dt>Traços</dt><dd>Barba cheia, degradê na lateral, brinco prata, fone no pescoço</dd></div>
+        </dl>
+      </div>
+    </article>
+    <article class="win char c">
+      <div class="st">
+        <span class="lt nm" data-split aria-hidden="true">Cebola</span>
+        <img class="fig" src="https://res.cloudinary.com/pjqox6al/image/upload/cebola.webp" alt="Cebola de corpo inteiro, todo de branco, cabelo loiro raspado" loading="lazy">
+      </div>
+      <div class="body">
+        <p class="lead"><b>O parceiro de todas as horas.</b> Produtor das madrugadas, rival no fliperama, companhia fiel no último metrô. Se o Gabigolzinho é o show, o Cebola é o backstage.</p>
+        <dl class="fi">
+          <div><dt>Função</dt><dd>Produtor e parceiro</dd></div>
+          <div><dt>Ponto forte</dt><dd>Beat, timing e resenha</dd></div>
+          <div class="wd"><dt>Uniforme</dt><dd>Long Sleeve Soccer Jersey White · Gabigol logo</dd></div>
+          <div class="wd"><dt>Traços</dt><dd>Loiro raspado, cavanhaque, olhar desconfiado</dd></div>
+        </dl>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="win" id="episodios" data-bg="4" aria-labelledby="h-ep">
+  <div class="bar"><h2 id="h-ep">Episódios</h2><span class="sm">Clique para assistir</span></div>
+  <div class="body"><div class="eps" id="eps"></div></div>
+</section>
+
+<section class="win" data-bg="5" aria-labelledby="h-duo">
+  <div class="bar"><h2 id="h-duo">A dupla</h2><span class="dots"><i></i><i></i><i></i></span></div>
+  <div class="mood duo" id="duoMood"></div>
+</section>
+
+<section class="win" data-bg="2" aria-labelledby="h-noite">
+  <div class="bar"><h2 id="h-noite">Depois do apito</h2><span class="dots"><i></i><i></i><i></i></span></div>
+  <div class="mood night" id="nightMood"></div>
+</section>
+
+<section class="win" data-bg="3" aria-labelledby="h-arte">
+  <div class="bar"><h2 id="h-arte">Desenho de TV, luz de cinema</h2><span class="sm">Direção de arte</span></div>
+  <div class="body">
+    <div class="art">
+      <button class="shot" type="button" id="artShot" aria-label="Ver cena em tela cheia"><img src="https://res.cloudinary.com/pjqox6al/image/upload/13.webp" alt="Gabigolzinho no quarto de hotel olhando a cidade" loading="lazy"></button>
+      <div>
+        <div class="rule"><b>Traço</b><p>2D chapado, contorno escuro uniforme, sombra simples. Olhos redondos com pupila em ponto.</p></div>
+        <div class="rule"><b>Luz</b><p>Luz fria que recorta o personagem no escuro, com um único ponto quente por cena.</p></div>
+        <div class="rule"><b>Cenário</b><p>Pintado à parte e reutilizável. O mesmo set recebe episódios, campanhas e convidados.</p></div>
+        <div class="rule"><b>Câmera</b><p>Quadros travados. Toda a ação vem do personagem, com peso natural.</p></div>
+      </div>
+    </div>
+    <div class="pal" aria-label="Paleta">
+      <div class="sw" style="background:#0A0A10;border-color:#3a3f5a"><b>Jet Black</b>#0A0A10</div>
+      <div class="sw" style="background:#1B2447"><b>Deep Navy</b>#1B2447</div>
+      <div class="sw" style="background:#4F7FB8"><b>Steel Blue</b>#4F7FB8</div>
+      <div class="sw" style="background:#2B2630"><b>Charcoal</b>#2B2630</div>
+      <div class="sw l" style="background:#E8E6F2"><b>Cold White</b>#E8E6F2</div>
+    </div>
+  </div>
+</section>
+
+<section class="win" id="referencias" data-bg="8" aria-labelledby="h-ref" style="overflow:visible">
+  <div class="bar" style="border-radius:8px 8px 0 0"><h2 id="h-ref">Desenhos que marcaram gerações</h2><span class="sm">Referências</span></div>
+  <div class="refrows" id="refrows"></div>
+</section>
+
+<div class="tagged cnw" data-bg="6">
+  <img class="ltag" src="https://res.cloudinary.com/pjqox6al/image/upload/logo-cartoonnetwork.webp" alt="Cartoon Network">
+  <section class="win" aria-labelledby="h-cn">
+    <div class="bar"><h2 id="h-cn">Cartoon Network</h2><span class="sm">A casa dos sonhos</span></div>
+    <div class="body cn">
+      <div>
+        <h3>Se essa história ganhar casa, sabemos onde bater primeiro.</h3>
+        <p class="lead muted" style="font-size:.95rem">Foi lá que desenhos autorais prenderam gerações inteiras. O nosso caminho é <b style="color:var(--cold)">publicidade e parcerias</b>, com espaço para um case conceitual que vá além da campanha.</p>
+      </div>
+      <div>
+        <blockquote class="q"><p>“O que nos diferencia é que aqui os artistas conduzem o processo em tudo.”</p><cite><b>Rob Sorcher</b>, chief content officer do Cartoon Network</cite></blockquote>
+        <p class="src">Frase traduzida do inglês. Fonte: <a href="https://entertainment.inquirer.net/?p=244314" target="_blank" rel="noopener">Inquirer Entertainment</a></p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="win" data-bg="1" aria-labelledby="h-why">
+  <div class="bar"><h2 id="h-why">Uma linguagem, duas gerações</h2><span class="sm">Por que funciona</span></div>
+  <div class="body why">
+    <div class="wc"><img src="https://res.cloudinary.com/pjqox6al/image/upload/t18.webp" alt="" loading="lazy"><div class="tx"><span class="k">Para quem está crescendo</span><h3>Os mais novos</h3><p>Personagem expressivo, cores, humor e uma rotina que dá vontade de acompanhar.</p></div></div>
+    <div class="wc"><img src="https://res.cloudinary.com/pjqox6al/image/upload/t3.webp" alt="" loading="lazy"><div class="tx"><span class="k">Para quem cresceu vendo</span><h3>Os mais velhos</h3><p>A nostalgia dos desenhos dos anos 2000, somada ao futebol e à cultura trap.</p></div></div>
+    <div class="wc"><img src="https://res.cloudinary.com/pjqox6al/image/upload/t10.webp" alt="" loading="lazy"><div class="tx"><span class="k">Para quem comunica</span><h3>As marcas</h3><p>Um personagem que não envelhece, não se lesiona e está disponível em qualquer formato.</p></div></div>
+  </div>
+</section>
+
+<section class="win" data-bg="5" aria-labelledby="h-apps">
+  <div class="bar"><h2 id="h-apps">Onde o personagem joga</h2><span class="sm">Aplicações</span></div>
+  <div class="body apps">
+    <article class="ap"><img src="https://res.cloudinary.com/pjqox6al/image/upload/t9.webp" alt="" loading="lazy"><div class="tx"><span class="tg">PUBLI</span><h3>Publicidade</h3><p>Campanhas, ativações e conteúdo de marca com o personagem como porta-voz.</p></div></article>
+    <article class="ap"><img src="https://res.cloudinary.com/pjqox6al/image/upload/t21.webp" alt="" loading="lazy"><div class="tx"><span class="tg">CLIPE</span><h3>Clipes</h3><p>O Gabigol também canta. O Lil Gabi ganha clipes, visualizers e lyric videos animados.</p></div></article>
+    <article class="ap"><img src="https://res.cloudinary.com/pjqox6al/image/upload/t11.webp" alt="" loading="lazy"><div class="tx"><span class="tg">PARCERIA</span><h3>Parcerias</h3><p>Inserções em canais interativos, como CazéTV e ge, e em outras casas e marcas.</p></div></article>
+    <article class="ap"><img src="https://res.cloudinary.com/pjqox6al/image/upload/t24.webp" alt="" loading="lazy"><div class="tx"><span class="tg">SÉRIE</span><h3>Conteúdo seriado</h3><p>Episódios curtos para redes sociais, com recorrência e personagens fixos.</p></div></article>
+  </div>
+</section>
+
+<section class="win" id="merch" data-bg="7" aria-labelledby="h-merch">
+  <div class="bar"><h2 id="h-merch">O desenho sai da tela</h2><span class="sm">Merch</span></div>
+  <div class="body merch">
+    <div class="mtext">
+      <p class="lead">O universo vira produto. As camisas que os personagens vestem saem do desenho e chegam na rua, levando a identidade da série para fora dela.</p>
+      <p class="lead muted" style="font-size:.92rem">Outras peças, como cadernos e acessórios, também podem ser desenvolvidas.</p>
+    </div>
+    <div class="racks">
+      <button class="shirt b" type="button" data-i="0"><span class="box"><img src="https://res.cloudinary.com/pjqox6al/image/upload/shirt.webp" alt="Long Sleeve Soccer Jersey Black com o logo do Gabigol no peito" loading="lazy"></span><span class="lab"><span><b>Long Sleeve Soccer Jersey Black</b><small>Gabigol logo · a camisa do Gabigolzinho</small></span><i>01</i></span></button>
+      <button class="shirt w" type="button" data-i="1"><span class="box"><img src="https://res.cloudinary.com/pjqox6al/image/upload/shirt2.webp" alt="Long Sleeve Soccer Jersey White com o logo do Gabigol no peito" loading="lazy"></span><span class="lab"><span><b>Long Sleeve Soccer Jersey White</b><small>Gabigol logo · a camisa do Cebola</small></span><i>02</i></span></button>
+    </div>
+  </div>
+</section>
+
+<section class="win" data-bg="3" aria-labelledby="h-3d">
+  <div class="bar"><h2 id="h-3d" style="font-size:1.15rem">E se fosse em 3D?</h2><span class="sm">Outra possibilidade</span></div>
+  <div class="mood alt3" id="altMood"></div>
+  <div class="d3sheet"><button type="button" id="altSheet" aria-label="Ver model sheet 3D"><img src="https://res.cloudinary.com/pjqox6al/image/upload/alt-sheet.webp" alt="Model sheet do Gabigolzinho em 3D" loading="lazy"></button></div>
+  <div class="tref">
+    <div class="tv">
+      <span class="tvh">McLaren Tooned</span>
+      <a class="scr" href="https://youtu.be/mwrw1NTMLyM?list=PLci488emJeTi4anWm8kPDd1BAEM_FTau4" target="_blank" rel="noopener" aria-label="Abrir McLaren Tooned no YouTube"><img src="https://res.cloudinary.com/pjqox6al/image/upload/tooned2.webp" alt="Cena de McLaren Tooned com os pilotos da equipe" loading="lazy"><span class="pl"></span></a>
+    </div>
+    <div class="ttx">
+      <span class="k">A referência</span>
+      <h3>Atleta de verdade, virando desenho.</h3>
+      <p>Tooned é uma série animada criada pela McLaren e produzida pelo estúdio Framestore. Os pilotos da equipe, como Lewis Hamilton e Jenson Button, viraram personagens em episódios curtos, de 3 a 4 minutos, exibidos na Sky Sports F1 antes das corridas e publicados no YouTube da McLaren.</p>
+      <p>Escolhemos essa referência porque ela nasce do meio esportivo e deu certo: estreou em 2012 e seguiu até 2016, com 30 episódios em quatro temporadas. É o mesmo caminho do Gabigolzinho, aqui com acabamento 3D.</p>
+      <a class="btn" href="https://youtu.be/mwrw1NTMLyM?list=PLci488emJeTi4anWm8kPDd1BAEM_FTau4" target="_blank" rel="noopener">Abrir no YouTube ↗</a>
+    </div>
+  </div>
+</section>
+
+<footer class="sign" data-bg="8">
+  <div class="lt logo2" data-split data-tilt aria-label="Gabigolzinho">GABIGOLZINHO</div>
+  <div class="part"><img src="https://res.cloudinary.com/pjqox6al/image/upload/logo-4content.webp" alt="4Content"><i>×</i><img class="gl" src="https://res.cloudinary.com/pjqox6al/image/upload/logo-gabigol.webp" alt=""><span>GABIGOL</span></div>
+  <p class="disc"><b>Projeto piloto.</b> Comunicação, estilo, personagens, logo, lettering e identidade visual estão sujeitos a alterações. Esta apresentação demonstra o potencial do formato para publicidade, conteúdo musical e parcerias. As marcas e obras citadas aparecem apenas como referência.</p>
+  <nav class="bar fnav" aria-label="Rodapé"><a href="#home">Voltar ao início</a><a href="#personagens">Personagens</a><a href="#episodios">Episódios</a><a href="#referencias">Referências</a><a href="#merch">Merch</a></nav>
+</footer>
+
+</div></div>
+
+<div class="thermo" id="thermo" aria-hidden="true"><div class="tr"></div><div class="fl" id="tFill"></div><div class="mk" id="tMark"><i id="tMarkI"></i></div></div>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="mwin">
+    <div class="bar"><span class="h" id="mTitle">Episódio</span><button class="x" type="button" id="mX" aria-label="Fechar">✕</button></div>
+    <div class="stage" id="mStage"></div>
+    <div class="ft"><div><b id="mH"></b><small id="mP"></small></div><div class="nav"><button type="button" id="mPrev" aria-label="Anterior">‹</button><button type="button" id="mNext" aria-label="Próximo">›</button></div></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* lettering */
+const ROT=[-6,4,-3,7,-5,3,-8,5,-2,6,-4,3],SC=[1,.94,1.06,.97,1.04,.93,1.02,.98,1.07,.95,1.03,.96];
+$$('[data-split]').forEach(el=>{const t=el.textContent,tilt=el.hasAttribute('data-tilt');el.textContent='';let k=0;
+  t.split(/(\s+)/).forEach(w=>{if(/^\s+$/.test(w)){el.appendChild(document.createTextNode(' '));return}
+    const ws=document.createElement('span');ws.style.display='inline-block';ws.style.whiteSpace='nowrap';ws.setAttribute('aria-hidden','true');
+    [...w].forEach(ch=>{const s=document.createElement('span');s.className='l';s.textContent=ch;const r=ROT[k%12];if(tilt)s.style.transform=`rotate(${r}deg) scale(${SC[k%12]})`;s.style.setProperty('--hr',(r>0?-1:1)*10+'deg');k++;ws.appendChild(s)});
+    el.appendChild(ws)})});
+
+/* popup (vídeo ou imagem): fundo escuro com desfoque */
+const modal=$('#modal'),mStage=$('#mStage');let MS=[],mi=0,lastF=null;
+document.body.appendChild(modal);
+function render(){const it=MS[mi];$('#mTitle').textContent=it.title||'';$('#mH').textContent=it.h||'';$('#mP').textContent=it.p||'';
+  mStage.innerHTML=it.video?`<video src="${it.video}" poster="${it.poster}" controls autoplay playsinline></video>`:`<img src="${it.src}" alt="${esc(it.h||'')}">`;
+  $('#mPrev').hidden=$('#mNext').hidden=MS.length<2;
+  const v=mStage.querySelector('video');if(v)v.play().catch(()=>{})}
+function openM(list,i){MS=list;mi=i;lastF=document.activeElement;render();modal.hidden=false;document.documentElement.style.overflow='hidden';$('#mX').focus({preventScroll:true})}
+function closeM(){mStage.innerHTML='';modal.hidden=true;document.documentElement.style.overflow='';lastF&&lastF.focus({preventScroll:true})}
+$('#mX').addEventListener('click',closeM);
+$('#mPrev').addEventListener('click',()=>{mi=(mi-1+MS.length)%MS.length;render()});
+$('#mNext').addEventListener('click',()=>{mi=(mi+1)%MS.length;render()});
+modal.addEventListener('click',e=>{if(e.target===modal)closeM()});
+document.addEventListener('keydown',e=>{if(modal.hidden)return;if(e.key==='Escape')closeM();if(e.key==='ArrowRight')$('#mNext').click();if(e.key==='ArrowLeft')$('#mPrev').click()});
+function gallery(container,list,make){list.forEach((it,i)=>{const b=make(it,i);b.addEventListener('click',()=>openM(list,i));container.appendChild(b)})}
+function tile(src,cls,label){const b=document.createElement('button');b.type='button';if(cls)b.className=cls;b.setAttribute('aria-label',label||'Ver imagem');b.innerHTML=`<img src="${src}" alt="" loading="lazy">`;return b}
+
+/* episódios */
+const EPS=[['ep-tunel2','O túnel','0:09','A dupla deixa o vestiário e caminha para a luz do campo.'],['ep-entrevista','A entrevista','0:10','Estúdio escuro, uma poltrona e um olhar direto pra câmera.'],['ep-estudio','O estúdio','0:10','Cebola na mesa de som, Gabi no microfone.']];
+const EPL=EPS.map(([f,h,d,p],i)=>({video:`https://res.cloudinary.com/pjqox6al/video/upload/${f}.mp4`,poster:`https://res.cloudinary.com/pjqox6al/image/upload/${f}.webp`,h,p,title:`Episódio 0${i+1} · ${d}`}));
+gallery($('#eps'),EPL,(it,i)=>{const b=document.createElement('button');b.type='button';b.className='ep';const [f,h,d,p]=EPS[i];
+  b.innerHTML=`<div class="th"><img src="https://res.cloudinary.com/pjqox6al/image/upload/${f}.webp" alt="" loading="lazy"><span class="pl"></span><span class="du">${d}</span></div><div class="tx"><b>EP 0${i+1} · ${h}</b><small>${p}</small></div>`;return b});
+
+/* a dupla: moodboard */
+const DUO=['s22','s21','s24','s25'].map(s=>({src:`https://res.cloudinary.com/pjqox6al/image/upload/${s}.webp`,title:'A dupla'}));
+const duoList=[DUO[1],DUO[0],DUO[2],DUO[3],{src:'https://res.cloudinary.com/pjqox6al/image/upload/ep-tunel2.webp',title:'A dupla'}];
+gallery($('#duoMood'),duoList,(it,i)=>tile(['https://res.cloudinary.com/pjqox6al/image/upload/t21.webp','https://res.cloudinary.com/pjqox6al/image/upload/t22.webp','https://res.cloudinary.com/pjqox6al/image/upload/t24.webp','https://res.cloudinary.com/pjqox6al/image/upload/t25.webp','https://res.cloudinary.com/pjqox6al/image/upload/ep-tunel2.webp'][i],'','Ver imagem da dupla'));
+
+/* uma noite: moodboard */
+const NIGHT=[6,7,5,8,12,3,9,10,2,1,11,4,18,16,19,13,20,17,15,14];
+const WIDE=new Set([6,3,11,13]);
+const NL=NIGHT.map(n=>({src:`https://res.cloudinary.com/pjqox6al/image/upload/${n}.webp`,title:'Depois do apito'}));
+gallery($('#nightMood'),NL,(it,i)=>tile(`https://res.cloudinary.com/pjqox6al/image/upload/${WIDE.has(NIGHT[i])?NIGHT[i]:'t'+NIGHT[i]}.webp`,WIDE.has(NIGHT[i])?('w'+(i%10===5?' r':'')):'','Ver cena'));
+
+/* direção de arte */
+$('#artShot').addEventListener('click',()=>openM([{src:'https://res.cloudinary.com/pjqox6al/image/upload/13.webp',title:'Direção de arte'}],0));
+
+/* referências: 3 linhas + outras */
+const REFS=[['regular-show','logo-regularshow','Regular Show',5,'O absurdo dentro da rotina de dois amigos. <b>A base do humor de dupla.</b>'],
+  ['craig-of-the-creek','logo-craig-of-the-creek','Craig of the Creek',3,'Um mundo inteiro construído a partir de um bairro. <b>Referência de universo.</b>'],
+  ['the-boondocks','logo-the-boondocks','The Boondocks',5,'Cultura hip-hop, atitude e <b>um traço com peso de cinema.</b>']];
+const rr=$('#refrows');
+REFS.forEach(([key,logo,name,n,note])=>{const row=document.createElement('div');row.className='rrow';
+  row.innerHTML=`<img class="ltag" src="https://res.cloudinary.com/pjqox6al/image/upload/${logo}.webp" alt="${esc(name)}"><div class="strip"></div><span class="note">${note}</span>`;
+  const L=[...Array(n)].map((_,i)=>({src:`https://res.cloudinary.com/pjqox6al/image/upload/ref-${key}-${i+1}.webp`,h:name,title:'Referências'}));
+  gallery(row.querySelector('.strip'),L,(it)=>tile(it.src,'','Ver '+name));rr.appendChild(row)});
+const orow=document.createElement('div');orow.className='rrow others';
+orow.innerHTML=`<span class="tagtxt">Outras referências</span><div class="strip"></div><span class="note">Clone High, Futbol High, Hora de Aventura, Jovens Titãs e cenários noturnos de animação.</span>`;
+gallery(orow.querySelector('.strip'),[...Array(11)].map((_,i)=>({src:`https://res.cloudinary.com/pjqox6al/image/upload/ref-outras-${i+1}.webp`,h:'Outras referências',title:'Referências'})),(it)=>tile(it.src,'','Ver referência'));
+rr.appendChild(orow);
+
+/* merch */
+const SH=[{src:'https://res.cloudinary.com/pjqox6al/image/upload/shirt.webp',h:'Long Sleeve Soccer Jersey Black',p:'Gabigol logo · a camisa do Gabigolzinho',title:'Merch'},{src:'https://res.cloudinary.com/pjqox6al/image/upload/shirt2.webp',h:'Long Sleeve Soccer Jersey White',p:'Gabigol logo · a camisa do Cebola',title:'Merch'}];
+$$('.shirt').forEach(b=>b.addEventListener('click',()=>openM(SH,+b.dataset.i)));
+
+/* e se fosse em 3D: moodboard com todas as imagens */
+const ALT=[...Array(16)].map((_,i)=>i+1);const AW=new Set();
+const AL=ALT.map(n=>({src:`https://res.cloudinary.com/pjqox6al/image/upload/alt${n}.webp`,title:'E se fosse em 3D?'}));
+gallery($('#altMood'),AL,(it,i)=>tile(`https://res.cloudinary.com/pjqox6al/image/upload/alt-t${ALT[i]}.webp`,'','Ver versão 3D'));
+$('#altSheet').addEventListener('click',()=>openM([{src:'https://res.cloudinary.com/pjqox6al/image/upload/alt-sheet.webp',title:'E se fosse em 3D?',h:'Model sheet 3D'}],0));
+
+
+/* fundo troca por bloco */
+const bgs=$$('#stagebg img');
+if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const n=e.target.dataset.bg;bgs.forEach(b=>b.classList.toggle('on',b.dataset.bg===n))}}),{rootMargin:'-45% 0px -50% 0px'});$$('.shell [data-bg]').forEach(s=>io.observe(s))}
+
+/* termômetro com a logo do Gabigol */
+const th=$('#thermo'),tf=$('#tFill'),tm=$('#tMark'),ti=$('#tMarkI'),A=[232,230,242],B=[47,111,228];
+function tick(){const max=document.documentElement.scrollHeight-innerHeight,p=max>0?Math.min(1,Math.max(0,scrollY/max)):0,c=A.map((v,i)=>Math.round(v+(B[i]-v)*p)),col=`rgb(${c})`;
+  tf.style.width=(p*100)+'%';tf.style.background=`linear-gradient(90deg,rgb(${A}),${col})`;tm.style.transform=`translateX(${p*th.clientWidth}px)`;ti.style.background=col;th.classList.toggle('gone',p>.985)}
+addEventListener('scroll',tick,{passive:true});addEventListener('resize',tick);tick();
+
+/* entrada */
+if(window.gsap&&!reduce){
+  gsap.from('.hero .logo .l',{yPercent:-160,opacity:0,duration:.85,ease:'back.out(2.4)',stagger:.05,delay:.25,clearProps:'opacity'});
+  gsap.from('.tab',{y:30,duration:.6,ease:'back.out(2.2)',stagger:.07,clearProps:'transform'});
+  gsap.from('.burst',{scale:0,duration:.8,ease:'back.out(3)',delay:.9});
+  $$('.lt .l').forEach(l=>l.addEventListener('pointerenter',()=>{const base=l.style.transform;gsap.fromTo(l,{scaleY:.65,scaleX:1.25},{scaleY:1,scaleX:1,duration:.7,ease:'elastic.out(1,.35)',onComplete:()=>{l.style.transform=base}})}));
+}
+</script>
